@@ -44,10 +44,24 @@ void loop() {
 
   // Read firm pressure sensor (force sensing resistor?)
   gripPressureValue = analogRead(firmPressurePin);
-  Serial.print("Grip pressure value: ");
-  Serial.println(gripPressureValue);
+  // Serial.print("Grip pressure value: ");
+  // Serial.println(gripPressureValue);
 
-  delay(2000);
+  delay(100);
+
+  
+  // see https://www.makerguides.com/a4988-stepper-motor-driver-arduino-tutorial/
+  // Set the spinning direction clockwise:
+  digitalWrite(dirPin, HIGH);
+  // Spin the stepper motor 1 revolution slowly:
+  for (int i = 0; i < stepsPerRevolution; i++) {
+    // These four lines result in 1 step:
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(2000);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(2000);
+  }
+  delay(1000);
 
   // Gripper toggle state
   int tInputVal = digitalRead(toggleBtnPin);
@@ -81,6 +95,7 @@ void homing() {
     // myStepper.step(1);
     // steps++;
   // }
+  
   Serial.print("Gripper endstop hit at ");
   Serial.print(steps);
   Serial.println(" steps.. gripper is fully closed");
