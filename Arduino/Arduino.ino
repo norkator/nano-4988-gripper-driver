@@ -12,6 +12,7 @@
 int dirPin          = 2;    // 4988 driver direction pin
 int stepPin         = 3;    // 4988 driver ste pin
 int endStopPin      = 4;    // homing endstop
+int enablePin       = 5;    // 4988 driver enable pin
 int toggleBtnPin    = 12;   // close|open signal (PC817)
 int firmPressurePin = A0;   // Firm pressure strip sensor pin, sensor connected with 1kΩ resistor.
 
@@ -31,6 +32,8 @@ void setup() {
   // Pin modes
   pinMode(dirPin, OUTPUT);
   pinMode(stepPin, OUTPUT);
+  pinMode(enablePin, OUTPUT);
+  digitalWrite(enablePin, HIGH);
   pinMode(endStopPin, INPUT_PULLUP);
   pinMode(toggleBtnPin, INPUT_PULLUP);
 }
@@ -44,10 +47,7 @@ void loop() {
 
   // Read firm pressure sensor (force sensing resistor?)
   gripPressureValue = analogRead(firmPressurePin);
-  // Serial.print("Grip pressure value: ");
-  // Serial.println(gripPressureValue);
 
-  delay(100);
 
   
   // see https://www.makerguides.com/a4988-stepper-motor-driver-arduino-tutorial/
