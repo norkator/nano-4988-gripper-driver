@@ -21,9 +21,10 @@ int firmPressurePin = A0;   // Firm pressure strip sensor pin, sensor connected 
 
 
 // Variables
+const unsigned long stepInterval = 50000UL;
 boolean homingDone = false;
 boolean gripperOpen = true; // after homing its open
-const int stepsPerRevolution = 10;   // steps per revolution
+const int stepsPerRevolution = 48;   // steps per revolution
 const int gripperStepsFullyOpen = -1500; // how many steps needed to reverse when gripper is fully open
 int gripPressureValue = 0;
 
@@ -89,15 +90,26 @@ void homing() {
   Serial.println("Homing gripper...");
   int steps = 0;
   int eStopVal = HIGH;
-  // while (eStopVal == HIGH) {
-    // eStopVal = digitalRead(endStopPin);
-    // myStepper.step(1);
-    // steps++;
-  // }
+  while (eStopVal == HIGH) {
+    eStopVal = digitalRead(endStopPin);
+    stepForward();
+    steps++;
+  }
   
   Serial.print("Gripper endstop hit at ");
   Serial.print(steps);
   Serial.println(" steps.. gripper is fully closed");
   Serial.println("Gripper fully open, saving current position");
   homingDone = true;
+}
+
+
+void stepForward() {
+  digitalWrite(dirPin, LOW); // Set the spinning direction clockwise:
+  for (int i = 0; i < stepsPerRevolution; i++) {
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(stepInterval);  //1.8 degrees/step
+    delay(10);
+    digitalWrite(stepPin, LOW);
+  }
 }
