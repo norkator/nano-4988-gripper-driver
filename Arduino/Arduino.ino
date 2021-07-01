@@ -22,7 +22,7 @@ int firmPressurePin = A0;   // Firm pressure strip sensor pin, sensor connected 
 const int stepsPerRevolution = 200;   // steps per revolution
 Stepper myStepper(stepsPerRevolution, motorA1, motorA2, motorB1, motorB2);
 const int stepperMotorSpeed = 150;    // stepper motor speed
-const int gripperStepsFullyOpen = -1500; // how many steps needed to reverse when gripper is fully open
+const int gripperStepsFullyOpen = -1700; // how many steps needed to reverse when gripper is fully open
 boolean homingDone = false;
 boolean gripperOpen = true; // after homing its open
 int gripPressureValue = 0;
@@ -33,6 +33,9 @@ int currentStepPosition = 0;
 void setup() {
   // Init serial
   Serial.begin(9600);
+
+  // Init stepper
+  myStepper.setSpeed(stepperMotorSpeed);
   
   // Pin modes
   pinMode(endStopPin, INPUT_PULLUP);
@@ -62,7 +65,8 @@ void loop() {
   } else {
     /* Todo */
   }
-  
+
+  turnOffStepper();
 }
 
 
@@ -88,4 +92,16 @@ void homing() {
   currentStepPosition = gripperStepsFullyOpen;
   Serial.println("Gripper fully open, saving current position");
   homingDone = true;
+}
+
+
+/**
+ * Turn off stepper driver
+ * solves stepper driver overheating problem
+ */
+void turnOffStepper() {
+  digitalWrite(motorA1, LOW);
+  digitalWrite(motorA2, LOW);
+  digitalWrite(motorB1, LOW);
+  digitalWrite(motorB2, LOW);
 }
