@@ -1,32 +1,32 @@
 /*
- * 4988 stepper driver gripper tester (Nano) ATmega328p
+ * L298N stepper driver gripper tester (Nano) ATmega328p
  * nano, gripper, film pressure sensor, homing switch, open close gipper push button
  */
 
 // ## Libraries ##
-/* none yet */
+#include <Stepper.h>
 
 // ########################
 // ## PIN CONFIGURATIONS ##
 // ########################
-int dirPin          = 2;    // 4988 driver direction pin
-int stepPin         = 3;    // 4988 driver ste pin
-int endStopPin      = 4;    // homing endstop
-int enablePin       = 5;    // 4988 driver enable pin
-int ms1Pin          = 6;    // 4988 driver microstepping 1 pin
-int ms2Pin          = 7;    // 4988 driver microstepping 2 pin
-int ms3Pin          = 8;    // 4988 driver microstepping 3 pin
-int toggleBtnPin    = 12;   // close|open signal (PC817)
+int motorA1         = 2;  // stepper A1
+int motorA2         = 3;  // stepper A2
+int motorB1         = 4;  // stepper B1
+int motorB2         = 5;  // stepper B2
+int endStopPin      = 7;    // homing endstop
+int toggleBtnPin    = 12;   // toggles direction, open and close
 int firmPressurePin = A0;   // Firm pressure strip sensor pin, sensor connected with 1kΩ resistor.
 
 
 // Variables
-const unsigned long stepInterval = 50000UL;
+const int stepsPerRevolution = 200;   // steps per revolution
+Stepper myStepper(stepsPerRevolution, motorA1, motorA2, motorB1, motorB2);
+const int stepperMotorSpeed = 150;    // stepper motor speed
+const int gripperStepsFullyOpen = -1500; // how many steps needed to reverse when gripper is fully open
 boolean homingDone = false;
 boolean gripperOpen = true; // after homing its open
-const int stepsPerRevolution = 48;   // steps per revolution
-const int gripperStepsFullyOpen = -1500; // how many steps needed to reverse when gripper is fully open
 int gripPressureValue = 0;
+int currentStepPosition = 0;
 
 
 // SETUP
@@ -35,22 +35,8 @@ void setup() {
   Serial.begin(9600);
   
   // Pin modes
-  pinMode(dirPin, OUTPUT);
-  pinMode(stepPin, OUTPUT);
-  pinMode(enablePin, OUTPUT);
-  pinMode(ms1Pin, OUTPUT);
-  pinMode(ms2Pin, OUTPUT);
-  pinMode(ms3Pin, OUTPUT);
   pinMode(endStopPin, INPUT_PULLUP);
   pinMode(toggleBtnPin, INPUT_PULLUP);
-  
-  // Enable 1/16 microstepping
-  digitalWrite(ms1Pin,HIGH);
-  digitalWrite(ms2Pin,HIGH);
-  digitalWrite(ms3Pin,HIGH);
-  
-  // Enable stepper
-  digitalWrite(enablePin, HIGH);
 }
 
 
@@ -92,24 +78,14 @@ void homing() {
   int eStopVal = HIGH;
   while (eStopVal == HIGH) {
     eStopVal = digitalRead(endStopPin);
-    stepForward();
+    myStepper.step(1);
     steps++;
   }
-  
   Serial.print("Gripper endstop hit at ");
   Serial.print(steps);
   Serial.println(" steps.. gripper is fully closed");
+  myStepper.step(gripperStepsFullyOpen); // open fully
+  currentStepPosition = gripperStepsFullyOpen;
   Serial.println("Gripper fully open, saving current position");
   homingDone = true;
-}
-
-
-void stepForward() {
-  digitalWrite(dirPin, LOW); // Set the spinning direction clockwise:
-  for (int i = 0; i < stepsPerRevolution; i++) {
-    digitalWrite(stepPin, HIGH);
-    delayMicroseconds(stepInterval);  //1.8 degrees/step
-    delay(10);
-    digitalWrite(stepPin, LOW);
-  }
 }
