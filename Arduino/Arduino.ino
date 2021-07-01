@@ -28,7 +28,7 @@ boolean gripperOpen = true; // after homing its open
 boolean gripperClosed = false;
 int gripPressureValue = 0;
 int currentStepPosition = 0;
-int gripPressureLimit = 700;
+int gripPressureLimit = 900;
 
 
 // SETUP
