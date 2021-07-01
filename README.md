@@ -11,10 +11,10 @@ Table of contents
 * [How it works](#how-it-works)
 * [Tweaks](#tweaks)
 * [L298N](#L298N)
-    * [Microstepping options](#microstepping-options)
 * [Schematic](#schematic)
     * [Arduino code](#arduino-code)
-    * [Sketch](#sketch)
+* [Arduino code](#arduino-code)
+* [Image](#image)
     
 
 How it works
@@ -51,3 +51,8 @@ Below image, one resistor between ground and A0 pin is 10k ohm.
 Arduino code
 -------
 Currently no special notes.
+
+
+Image
+============
+![img](./docs/209290103_.jpg)
