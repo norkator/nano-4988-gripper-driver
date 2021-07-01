@@ -25,8 +25,10 @@ const int stepperMotorSpeed = 150;    // stepper motor speed
 const int gripperStepsFullyOpen = -1700; // how many steps needed to reverse when gripper is fully open
 boolean homingDone = false;
 boolean gripperOpen = true; // after homing its open
+boolean gripperClosed = false;
 int gripPressureValue = 0;
 int currentStepPosition = 0;
+int gripPressureLimit = 700;
 
 
 // SETUP
@@ -49,8 +51,7 @@ void loop() {
     homing();
   }
 
-  // Read firm pressure sensor (force sensing resistor?)
-  gripPressureValue = analogRead(firmPressurePin);
+  readGripperPressure();
 
   // Gripper toggle state
   int tInputVal = digitalRead(toggleBtnPin);
@@ -61,9 +62,13 @@ void loop() {
 
   // Gripper control
   if (gripperOpen) {
-    /* Todo */
+    if (gripperClosed == true) {
+      openGripper();
+    }
   } else {
-    /* Todo */
+    if (gripperClosed == false) {
+      closeGripper();
+    }
   }
 
   turnOffStepper();
@@ -96,6 +101,32 @@ void homing() {
 
 
 /**
+ * 
+ */
+void closeGripper() {
+  int steps = 0;
+  int eStopVal = HIGH;
+  while (eStopVal == HIGH && gripPressureValue < gripPressureLimit) {
+    readGripperPressure();
+    eStopVal = digitalRead(endStopPin);
+    myStepper.step(1);
+    steps++;
+  }
+  currentStepPosition = steps;
+  gripperClosed = true;
+}
+
+
+/**
+ * 
+ */
+void openGripper() {
+  myStepper.step(-currentStepPosition);
+  gripperClosed = false;
+}
+
+
+/**
  * Turn off stepper driver
  * solves stepper driver overheating problem
  */
@@ -104,4 +135,13 @@ void turnOffStepper() {
   digitalWrite(motorA2, LOW);
   digitalWrite(motorB1, LOW);
   digitalWrite(motorB2, LOW);
+}
+
+
+/**
+ * 
+ */
+void readGripperPressure() {
+  // Read firm pressure sensor (force sensing resistor?)
+  gripPressureValue = analogRead(firmPressurePin);
 }
